@@ -1,0 +1,110 @@
+/* Aegis — Global styles */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    @apply bg-aegis-dark text-aegis-text font-body;
+    min-height: 100vh;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-aegis-dark;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-aegis-border rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-aegis-muted;
+  }
+
+  /* Selection */
+  ::selection {
+    background: rgba(34, 197, 94, 0.3);
+    color: #f1f5f9;
+  }
+}
+
+@layer components {
+  /* Glassmorphism card */
+  .glass-card {
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(51, 65, 85, 0.8);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 16px;
+  }
+
+  /* Green glow effect */
+  .green-glow {
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.15),
+                0 0 60px rgba(34, 197, 94, 0.05);
+  }
+
+  /* Subtle green border glow */
+  .border-glow {
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.1);
+  }
+
+  /* Background glow pattern */
+  .bg-glow {
+    background-image: radial-gradient(
+        circle at 70% 30%,
+        rgba(34, 197, 94, 0.15),
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 20% 80%,
+        rgba(34, 197, 94, 0.08),
+        transparent 40%
+      );
+  }
+
+  /* Input styles */
+  .aegis-input {
+    @apply w-full px-4 py-3 rounded-xl bg-aegis-dark/80 border border-aegis-border
+    text-aegis-text placeholder:text-aegis-muted/60 font-body text-sm
+    focus:outline-none focus:border-aegis-green/50 focus:ring-1 focus:ring-aegis-green/30
+    transition-all duration-200;
+  }
+
+  /* Button primary */
+  .aegis-btn {
+    @apply px-6 py-3 rounded-xl bg-aegis-green text-aegis-dark font-semibold font-body
+    text-sm hover:bg-aegis-green/90 active:scale-[0.98]
+    transition-all duration-200 shadow-lg shadow-aegis-green/20
+    disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Button outline */
+  .aegis-btn-outline {
+    @apply px-6 py-3 rounded-xl border border-aegis-border text-aegis-text font-body
+    text-sm hover:bg-aegis-surface hover:border-aegis-green/30
+    active:scale-[0.98] transition-all duration-200;
+  }
+}
+
+@layer utilities {
+  .text-gradient-green {
+    background: linear-gradient(135deg, #22c55e, #4ade80);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
