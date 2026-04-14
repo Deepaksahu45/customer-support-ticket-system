@@ -22,10 +22,13 @@ const server = http.createServer(app);
 const io = initSocket(server);
 
 // Middleware
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
-  credentials: true,
-}));
+app.use(
+  cors({
+    // origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: '*',
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -62,7 +65,19 @@ app.use(errorMiddleware);
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
-  await connectDB();
+  // await connectDB();
+  const startServer = async () => {
+    try {
+      await connectDB();
+
+      server.listen(PORT, () => {
+        console.log(`Aegis Server running on port ${PORT}`);
+      });
+    } catch (error) {
+      console.error('❌ Failed to connect DB:', error);
+      process.exit(1);
+    }
+  };
   server.listen(PORT, () => {
     console.log(`\n🛡️  Aegis Server running on port ${PORT}`);
     console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`);
