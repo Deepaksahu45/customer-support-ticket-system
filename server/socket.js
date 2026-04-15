@@ -4,10 +4,20 @@ const jwt = require('jsonwebtoken');
 const Message = require('./models/Message');
 
 const initSocket = (server) => {
+  // Build allowed origins list (must match server.js CORS config)
+  const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:3000',
+  ];
+  if (process.env.CLIENT_URL) {
+    allowedOrigins.push(process.env.CLIENT_URL);
+  }
+
   const io = new Server(server, {
     cors: {
-      origin: process.env.CLIENT_URL || 'http://localhost:5173',
+      origin: allowedOrigins,
       methods: ['GET', 'POST'],
+      credentials: true,
     },
   });
 

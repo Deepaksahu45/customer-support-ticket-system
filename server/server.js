@@ -21,11 +21,26 @@ const server = http.createServer(app);
 // Initialize Socket.io
 const io = initSocket(server);
 
+// Build allowed origins list from CLIENT_URL env var
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+];
+if (process.env.CLIENT_URL) {
+  allowedOrigins.push(process.env.CLIENT_URL);
+}
+
 // Middleware
 app.use(
   cors({
-    // origin: process.env.CLIENT_URL || 'http://localhost:5173',
-    origin: '*',
+    origin: function (origin, callback) {
+      // Allow requests with no origin (mobile apps, curl, Postman, etc.)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
   })
 );
@@ -65,25 +80,19 @@ app.use(errorMiddleware);
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
-  // await connectDB();
-  const startServer = async () => {
-    try {
-      await connectDB();
+  try {
+    await connectDB();
 
-      server.listen(PORT, () => {
-        console.log(`Aegis Server running on port ${PORT}`);
-      });
-    } catch (error) {
-      console.error('❌ Failed to connect DB:', error);
-      process.exit(1);
-    }
-  };
-  server.listen(PORT, () => {
-    console.log(`\n🛡️  Aegis Server running on port ${PORT}`);
-    console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`   API: http://localhost:${PORT}/api`);
-    console.log(`   Client: ${process.env.CLIENT_URL}\n`);
-  });
+    server.listen(PORT, () => {
+      console.log(`\n🛡️  Aegis Server running on port ${PORT}`);
+      console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`   API: http://localhost:${PORT}/api`);
+      console.log(`   Client: ${process.env.CLIENT_URL}\n`);
+    });
+  } catch (error) {
+    console.error('❌ Failed to start Aegis server:', error.message);
+    process.exit(1);
+  }
 };
 
 startServer();
