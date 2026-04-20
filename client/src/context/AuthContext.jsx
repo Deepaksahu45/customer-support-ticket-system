@@ -42,9 +42,9 @@ export const AuthProvider = ({ children }) => {
     return res.data;
   }, []);
 
-  // Register
-  const register = useCallback(async (name, email, password) => {
-    const res = await axiosInstance.post('/auth/register', { name, email, password });
+  // Register — accepts { name, email, password, role }
+  const register = useCallback(async (data) => {
+    const res = await axiosInstance.post('/auth/register', data);
     const { token: newToken, user: newUser } = res.data.data;
     persistAuth(newToken, newUser);
     return res.data;

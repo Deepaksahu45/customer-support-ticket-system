@@ -1,20 +1,53 @@
-// Aegis — Register page
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+// Aegis — Register page with role selection (Customer + Agent)
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff, User, ArrowRight } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, User, ArrowRight, Headphones } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import AegisLogo from '../components/AegisLogo';
 
+const ROLES = [
+  {
+    id: 'customer',
+    label: 'Customer',
+    icon: User,
+    desc: 'Submit tickets and track support requests',
+    accent: 'text-indigo-400',
+    activeBg: 'bg-indigo-500/15',
+    activeBorder: 'border-indigo-500/40',
+  },
+  {
+    id: 'agent',
+    label: 'Agent',
+    icon: Headphones,
+    desc: 'Respond to and resolve customer tickets',
+    accent: 'text-blue-400',
+    activeBg: 'bg-blue-500/15',
+    activeBorder: 'border-blue-500/40',
+  },
+];
+
 const Register = () => {
+  const [searchParams] = useSearchParams();
+  const initialRole = ROLES.find((r) => r.id === searchParams.get('role'))?.id || 'customer';
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
+  const [selectedRole, setSelectedRole] = useState(initialRole);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { register } = useAuth();
   const navigate = useNavigate();
+
+  // Update role if URL param changes
+  useEffect(() => {
+    const roleParam = searchParams.get('role');
+    if (roleParam && ROLES.find((r) => r.id === roleParam)) {
+      setSelectedRole(roleParam);
+    }
+  }, [searchParams]);
 
   // Password strength calculation
   const getPasswordStrength = (pass) => {
@@ -44,7 +77,7 @@ const Register = () => {
     }
     setLoading(true);
     try {
-      await register(name, email, password);
+      await register({ name, email, password, role: selectedRole });
       navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed. Please try again.');
@@ -53,9 +86,11 @@ const Register = () => {
     }
   };
 
+  const activeRole = ROLES.find((r) => r.id === selectedRole) || ROLES[0];
+
   return (
     <div
-      className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden"
+      className="min-h-screen flex items-center justify-center px-4 py-8 relative overflow-hidden"
       style={{
         background: `#071a0e`,
         backgroundImage: `
@@ -76,14 +111,50 @@ const Register = () => {
         className="glass-card w-full max-w-md p-8 relative z-10"
       >
         {/* Logo + Tagline */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <div className="flex justify-center mb-4">
             <AegisLogo size="lg" variant="full" />
           </div>
           <p className="text-aegis-green/70 font-brand text-sm tracking-wide">
-            Support. Resolved. Instantly.
+            Create your account
           </p>
         </div>
+
+        {/* Role Tabs */}
+        <div className="flex gap-2 mb-6">
+          {ROLES.map((role) => {
+            const Icon = role.icon;
+            const isActive = selectedRole === role.id;
+            return (
+              <button
+                key={role.id}
+                type="button"
+                onClick={() => {
+                  setSelectedRole(role.id);
+                  setError('');
+                }}
+                className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 border ${
+                  isActive
+                    ? `${role.activeBg} ${role.activeBorder} ${role.accent}`
+                    : 'border-aegis-border/50 text-aegis-muted hover:bg-aegis-surface hover:text-aegis-text'
+                }`}
+              >
+                <Icon size={16} />
+                {role.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Role description */}
+        <motion.p
+          key={selectedRole}
+          initial={{ opacity: 0, y: -5 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-xs text-aegis-muted text-center mb-5"
+        >
+          {activeRole.desc}
+        </motion.p>
 
         {/* Error */}
         {error && (
@@ -170,40 +241,25 @@ const Register = () => {
               <div className="w-5 h-5 border-2 border-aegis-dark/30 border-t-aegis-dark rounded-full animate-spin" />
             ) : (
               <>
-                Create Account
+                Create {activeRole.label} Account
                 <ArrowRight size={16} />
               </>
             )}
           </button>
         </form>
 
-        {/* Social login (UI only) */}
-        <div className="mt-6">
-          <div className="relative mb-4">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-aegis-border/50" />
-            </div>
-            <div className="relative flex justify-center">
-              <span className="px-3 bg-aegis-surface/70 text-xs text-aegis-muted">or continue with</span>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <button className="aegis-btn-outline flex items-center justify-center gap-2 text-sm py-2.5">
-              <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#ea4335" d="M5.27 9.77A7.79 7.79 0 0 1 12 4.5c1.95 0 3.7.7 5.08 1.87L20.5 3A12 12 0 0 0 .46 9.23l4.81 3.54Z"/><path fill="#4285f4" d="M23.5 12.27c0-.88-.07-1.52-.22-2.18H12v4.06h6.6a5.58 5.58 0 0 1-2.45 3.68l3.86 3A11.86 11.86 0 0 0 23.5 12.27Z"/><path fill="#fbbc05" d="M5.27 14.23A7.56 7.56 0 0 1 4.5 12c0-.78.13-1.53.37-2.23L.06 6.23A12.09 12.09 0 0 0 0 12c0 1.93.46 3.76 1.28 5.39l3.99-3.16Z"/><path fill="#34a853" d="M12 24c3.24 0 5.95-1.07 7.93-2.91l-3.86-3a7.24 7.24 0 0 1-4.07 1.17 7.72 7.72 0 0 1-6.73-5.03L1.28 17.4A12 12 0 0 0 12 24Z"/></svg>
-              Google
-            </button>
-            <button className="aegis-btn-outline flex items-center justify-center gap-2 text-sm py-2.5">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11Z"/></svg>
-              Apple
-            </button>
-          </div>
-        </div>
-
         {/* Login link */}
         <p className="mt-6 text-center text-sm text-aegis-muted">
           Already have an account?{' '}
           <Link to="/login" className="text-aegis-green hover:text-aegis-green/80 font-medium transition-colors">
             Sign in
+          </Link>
+        </p>
+
+        {/* Back to landing */}
+        <p className="mt-3 text-center">
+          <Link to="/" className="text-xs text-aegis-muted hover:text-aegis-text transition-colors">
+            ← Back to home
           </Link>
         </p>
       </motion.div>

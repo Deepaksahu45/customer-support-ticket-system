@@ -12,6 +12,18 @@ const generateToken = (userId) => {
 const register = async (req, res) => {
   const { name, email, password, role } = req.body;
 
+  // Only allow customer and agent registration
+  const allowedRoles = ['customer', 'agent'];
+  const selectedRole = role && allowedRoles.includes(role) ? role : 'customer';
+
+  // Block admin registration entirely
+  if (role === 'admin') {
+    return res.status(403).json({
+      success: false,
+      message: 'Admin registration is not allowed. Please use the demo admin login.',
+    });
+  }
+
   // Check if user exists
   const existingUser = await User.findOne({ email });
   if (existingUser) {
@@ -21,12 +33,12 @@ const register = async (req, res) => {
     });
   }
 
-  // Create user (role defaults to 'customer' unless specified)
+  // Create user with validated role
   const user = await User.create({
     name,
     email,
     password,
-    role: role || 'customer',
+    role: selectedRole,
   });
 
   const token = generateToken(user._id);

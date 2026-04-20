@@ -1,14 +1,15 @@
 // Aegis — Login page
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import AegisLogo from '../components/AegisLogo';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [searchParams] = useSearchParams();
+  const [email, setEmail] = useState(searchParams.get('email') || '');
+  const [password, setPassword] = useState(searchParams.get('password') || '');
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');

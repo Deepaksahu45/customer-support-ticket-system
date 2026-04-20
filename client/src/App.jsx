@@ -6,6 +6,9 @@ import { useAuth } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
+import DemoBanner from './components/DemoBanner';
+import SplashScreen from './components/SplashScreen';
+import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
@@ -37,6 +40,7 @@ const AppLayout = ({ children }) => {
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         className="pt-16 min-h-screen"
       >
+        <DemoBanner />
         <div className="p-4 md:p-6 lg:p-8 max-w-7xl">
           {children}
         </div>
@@ -49,19 +53,13 @@ const App = () => {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-aegis-dark">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-2 border-aegis-green/30 border-t-aegis-green rounded-full animate-spin" />
-          <p className="text-aegis-muted font-body text-sm">Loading Aegis...</p>
-        </div>
-      </div>
-    );
+    return <SplashScreen />;
   }
 
   return (
     <Routes>
       {/* Public routes */}
+      <Route path="/" element={<Landing />} />
       <Route
         path="/login"
         element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login />}
@@ -114,8 +112,7 @@ const App = () => {
         }
       />
 
-      {/* Redirects */}
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      {/* Catch-all */}
       <Route
         path="*"
         element={
